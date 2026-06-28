@@ -5,19 +5,31 @@ const empty = document.querySelector("#emptyState");
 const sortMode = document.querySelector("#sortMode");
 const grid = document.querySelector("#paperGrid");
 let activeFilter = "all";
-cards.forEach((card, index) => { card.dataset.order = String(index); });
+
+cards.forEach((card, index) => {
+  card.dataset.order = String(index);
+});
+
 function sortedCards() {
   const mode = sortMode?.value || "default";
   const ordered = [...cards];
   if (mode === "author") {
-    ordered.sort((a, b) => (a.dataset.author || "").localeCompare(b.dataset.author || "", "zh-CN-u-co-pinyin") || Number(a.dataset.order) - Number(b.dataset.order));
+    ordered.sort((a, b) => {
+      const value = (a.dataset.author || "").localeCompare(b.dataset.author || "", "zh-CN-u-co-pinyin");
+      return value || Number(a.dataset.order) - Number(b.dataset.order);
+    });
   } else if (mode === "yearDesc") {
-    ordered.sort((a, b) => ((Number.parseInt(b.dataset.year || "0", 10) || 0) - (Number.parseInt(a.dataset.year || "0", 10) || 0)) || Number(a.dataset.order) - Number(b.dataset.order));
+    ordered.sort((a, b) => {
+      const yearA = Number.parseInt(a.dataset.year || "0", 10) || 0;
+      const yearB = Number.parseInt(b.dataset.year || "0", 10) || 0;
+      return (yearB - yearA) || Number(a.dataset.order) - Number(b.dataset.order);
+    });
   } else {
     ordered.sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order));
   }
   return ordered;
 }
+
 function updateCards() {
   const query = (input?.value || "").trim().toLowerCase();
   let visible = 0;
@@ -31,6 +43,7 @@ function updateCards() {
   }
   if (empty) empty.style.display = visible ? "none" : "block";
 }
+
 for (const button of buttons) {
   button.addEventListener("click", () => {
     activeFilter = button.dataset.filter;
@@ -38,6 +51,7 @@ for (const button of buttons) {
     updateCards();
   });
 }
+
 input?.addEventListener("input", updateCards);
 sortMode?.addEventListener("change", updateCards);
 updateCards();
